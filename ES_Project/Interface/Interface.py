@@ -1,13 +1,13 @@
-from io import BytesIO
+
 import sys
+# Add paths for those directories first (for the error: Module Not Found)
 sys.path.append("C:\\Users\\LENOVO\\Code\\AI\\ES_Project")
 sys.path.append("C:\\Users\\LENOVO\\Code\\AI\\ES_Project\\Logic")
+
+from io import BytesIO
 from Logic.GoogleBooksApiCall import *
 from PIL import Image, ImageTk
-import Logic.aima1
 from Logic.ProjectLogic import infer_books
-
-
 from ctypes import windll
 import tkinter as tk
 from tkinter import ttk  # for nicer widgets
@@ -191,6 +191,7 @@ class BookRecommendationSystem(tk.Tk):
         
         books += infer_books(author,selected_genres)
         
+        # Getting online data for the books
         google_books =  [] 
         for book in books:
             google_books.append(get_books_by_title(str(book))[0])
