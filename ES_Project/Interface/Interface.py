@@ -1,4 +1,3 @@
-
 import sys
 # Add paths for those directories first (for the error: Module Not Found)
 sys.path.append("C:\\Users\\LENOVO\\Code\\AI\\ES_Project")
@@ -48,13 +47,12 @@ class BookRecommendationSystem(tk.Tk):
 
         # Setup options with checkboxes and other widgets
         self.setup_options()
-
-        # Function to add book cards to the grid      
+     
     def setup_options(self):
+        """ This function set-ups the widgets for the user to choose his preferences"""
         # Search section
         search_frame = ttk.LabelFrame(self.top_frame, text="Any Favourite Authors?")
         search_frame.grid(row=0, column=0, padx=10, pady=5, sticky="nw")
-
         self.search_var = tk.StringVar()
         ttk.Entry(search_frame, textvariable=self.search_var, width=50).pack(side=tk.LEFT, padx=5,pady=5)
         ttk.Button(search_frame, text='Search', command=self.on_search).pack(side=tk.LEFT, padx=5,pady=5)
@@ -62,7 +60,6 @@ class BookRecommendationSystem(tk.Tk):
         # Rating selection section
         rating_frame = ttk.LabelFrame(self.top_frame, text="Rating")
         rating_frame.grid(row=1, column=1, padx=10, pady=5, sticky="nsew")
-
         self.rating_var = tk.DoubleVar()
         ttk.Scale(rating_frame, from_=0, to=5, orient='horizontal', variable=self.rating_var).pack(fill=tk.X, padx=5)
         self.rating_label = tk.Label(rating_frame, text="Select minimum rating")
@@ -72,7 +69,6 @@ class BookRecommendationSystem(tk.Tk):
         # Publication year selection
         year_frame = ttk.LabelFrame(self.top_frame, text="Publication Year")
         year_frame.grid(row=1, column=3, padx=10, pady=5, sticky="nsew")
-
         self.year_var = tk.IntVar()
         current_year = 2024  # Replace with the current year retrieved dynamically if needed
         ttk.Combobox(year_frame, textvariable=self.year_var, values=list(map(str,range(1900, current_year+1)))).pack(fill=tk.X, padx=5,pady=10)
@@ -80,7 +76,6 @@ class BookRecommendationSystem(tk.Tk):
         # Genre selection section
         genre_frame = ttk.LabelFrame(self.top_frame, text="Genres")
         genre_frame.grid(row=1, column=0, padx=10, pady=5, sticky="nsew")
-
         self.genre_vars = {}
         for genre in self.genres:
             self.genre_vars[genre] = tk.BooleanVar()
@@ -96,11 +91,13 @@ class BookRecommendationSystem(tk.Tk):
     def update_rating_label(self, *args):
         rating = self.rating_var.get()
         self.rating_label.config(text=f'Select minimum rating: {rating:.1f}')
+    
     def on_configure(self, event):
         # Set the scroll region to encompass the inner frame
         self.canvas.configure(scrollregion=self.canvas.bbox('all'))
+    
     def add_book_cards(self,books):
-        # Determine columns for grid layout
+        # Implement book cards using information from google api's function:
         columns = 7
         for i in range(len(books)):
             book = books[i]
@@ -149,20 +146,24 @@ class BookRecommendationSystem(tk.Tk):
         # This is used to ensure that the card frames do not shrink or expand
         # beyond what's required by the label dimensions
         self.cards_frame.pack_propagate(False)
+    
     def clear_book_cards(self):
         # Remove all the book cards from the cards_frame
         for widget in self.cards_frame.winfo_children():
             widget.destroy()
+    
     def on_search(self):
+        """ This function will get the recommended books using inference logic """
+        # Resetting environment
         self.clear_book_cards()
         # Getting user input:
         author = self.search_var.get()
         selected_genres = [genre for genre, var in self.genre_vars.items() if var.get()]
         min_rating = self.rating_var.get()
         year = self.year_var.get()
-        print(author,selected_genres,min_rating,year)
-        books = []
         
+        books = []
+        # Getting books published after year
         if year: 
             if not books:
                 for y in range(year,2025):
@@ -174,7 +175,8 @@ class BookRecommendationSystem(tk.Tk):
             #     for book in books:
             #         if int(book.get("publishedDate")[0:4]) <= year:
             #             books.remove(book)
-            
+        
+        # Getting books according to a minimum rating
         if min_rating:
             if not books:
                 if min_rating >= 4.0:
@@ -188,7 +190,8 @@ class BookRecommendationSystem(tk.Tk):
             #     for book in books:
             #         if float(book) <= min_rating:
             #             books.remove(book)
-        
+
+        #adding books if author, genres are included
         books += infer_books(author,selected_genres)
         
         # Getting online data for the books
